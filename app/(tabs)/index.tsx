@@ -1,78 +1,92 @@
-import { Image, StyleSheet, Platform } from "react-native";
+import React, { useState } from "react";
+import { Alert, Image, StyleSheet, Text, View } from "react-native";
+import { FlashList } from "@shopify/flash-list";
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
+import { homeFeed } from "@/placeholder";
+import { runOnJS } from "react-native-reanimated";
 
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 
 export default function HomeScreen() {
+  const [visibleCaptions, setVisibleCaptions] = useState<{ [key: string]: boolean }>({});
+
+  const handleDoubleTap = () => {
+    Alert.alert("Double tapped!", "This will favorite in Part 2.");
+  };
+
+  const handleLongPress = (id: string) => {
+    setVisibleCaptions((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+  
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-          to see changes. Press{" "}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: "cmd + d",
-              android: "cmd + m",
-              web: "F12",
-            })}
-          </ThemedText>{" "}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this
-          starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{" "}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText>{" "}
-          to get a fresh <ThemedText type="defaultSemiBold">app</ThemedText>{" "}
-          directory. This will move the current{" "}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{" "}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <GestureHandlerRootView style={styles.root}>
+      <FlashList
+        data={homeFeed}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => {
+          // define gestures per item
+          const doubleTap = Gesture.Tap()
+            .numberOfTaps(2)
+            .onStart(() => handleDoubleTap());
+
+          const longPress = Gesture.LongPress()
+            .minDuration(400)
+            .onStart(() => {
+              runOnJS(handleLongPress)(item.id);
+            });
+
+          const composed = Gesture.Simultaneous(doubleTap, longPress);
+
+          return (
+            <GestureDetector gesture={composed}>
+              <View style={styles.imageContainer}>
+                <Image source={{ uri: item.image }} style={styles.image} />
+                {visibleCaptions[item.id] && (
+                  <View style={styles.captionContainer}>
+                    <Text style={styles.captionText}>{item.caption}</Text>
+                  </View>
+                )}
+              </View>
+            </GestureDetector>
+          );
+        }}
+      />
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
+  root: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  imageContainer: {
+    marginBottom: 15,
     alignItems: "center",
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  image: {
+    width: "90%",
+    height: 400,
+    borderRadius: 12,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  captionContainer: {
     position: "absolute",
+    bottom: 10,
+    left: 20,
+    right: 20,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    padding: 10,
+    borderRadius: 8,
+  },
+  captionText: {
+    color: "#fff",
+    textAlign: "center",
   },
 });
