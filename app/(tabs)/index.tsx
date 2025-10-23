@@ -34,7 +34,9 @@ export default function HomeScreen() {
           // define gestures per item
           const doubleTap = Gesture.Tap()
             .numberOfTaps(2)
-            .onStart(() => handleDoubleTap());
+            .onStart(() => {
+              runOnJS(handleDoubleTap)();
+            });
 
           const longPress = Gesture.LongPress()
             .minDuration(400)
