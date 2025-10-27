@@ -37,7 +37,7 @@ export default function HomeScreen() {
             .onStart(() => {
               runOnJS(handleDoubleTap)();
             });
-
+ 
           const longPress = Gesture.LongPress()
             .minDuration(400)
             .onStart(() => {
