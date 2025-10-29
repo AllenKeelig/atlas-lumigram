@@ -1,15 +1,18 @@
-import { Pressable } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import React from 'react';
+import { Button, Alert } from 'react-native';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/firebaseConfig';
+import { router } from 'expo-router';
 
 export function Logout() {
-  const router = useRouter();
-  function logout(){
-    router.replace("/login")
-  }
-  return (
-    <Pressable onPress={logout}>
-      <Ionicons name="log-out-outline" size={24} style={{marginRight: 16 }} />
-    </Pressable>
-  );
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.replace('/login'); // Go back to login or home screen
+    } catch (error: any) {
+      Alert.alert('Logout failed', error.message);
+    }
+  };
+
+  return <Button title="Logout" onPress={handleLogout} />;
 }

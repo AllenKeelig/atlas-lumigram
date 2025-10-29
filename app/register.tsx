@@ -1,8 +1,22 @@
+import { useState } from "react";
 import { Link, useRouter } from "expo-router";
-import { Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, TextInput, View, Alert } from "react-native";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebaseConfig";
 
 export default function Page() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleRegister = async () => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      router.replace("/(tabs)/"); // Go to home tab when account is created
+    } catch (error) {
+      Alert.alert("Registration Error", "Could not create account. Try again.");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -13,15 +27,20 @@ export default function Page() {
         style={styles.input}
         placeholder="Email"
         placeholderTextColor="#fff"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
         placeholderTextColor="#fff"
         secureTextEntry
+        value={password}
+        onChangeText={setPassword}
       />
 
-      <Pressable style={styles.button} onPress={() => router.replace("/(tabs)/")}>
+      <Pressable style={styles.button} onPress={handleRegister}>
         <Text style={styles.buttonText}>Create Account</Text>
       </Pressable>
 
