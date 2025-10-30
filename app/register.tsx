@@ -12,7 +12,7 @@ export default function Page() {
   const handleRegister = async () => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      router.replace("/(tabs)/"); // Go to home tab when account is created
+      router.replace("/(tabs)/");
     } catch (error) {
       Alert.alert("Registration Error", "Could not create account. Try again.");
     }
